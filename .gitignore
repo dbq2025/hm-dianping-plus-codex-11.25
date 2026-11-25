@@ -1,0 +1,27 @@
+# 本地配置和旧仓库备份
+/.git-history-backup/
+/hm-dianping/config/application.yaml
+/hm-dianping/config/application-local.*
+/hm-dianping/src/main/resources/application-local.*
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Maven 编译产物和 IDE 配置
+/hm-dianping/target/
+.idea/
+.vscode/
+*.iml
+*.class
+
+# Nginx 运行时文件和系统杂项
+/hmdp-nginx/logs/
+/hmdp-nginx/temp/
+*.log
+Thumbs.db
+.DS_Store
