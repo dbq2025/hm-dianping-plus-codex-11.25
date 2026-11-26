@@ -91,10 +91,11 @@ hm-dianping
 | `HMDP_REDIS_HOST` | `127.0.0.1` | Redis 主机 |
 | `HMDP_REDIS_PORT` | `6379` | Redis 端口 |
 | `HMDP_REDIS_PASSWORD` | 空 | Redis 密码 |
+| `HMDP_UPLOAD_DIR` | `../hmdp-nginx/html/hmdp/imgs` | 图片上传与删除的根目录，相对于后端工作目录 |
 
 也可以在 `hm-dianping/config/application.yaml` 写入本机的 `spring.datasource` 和 `spring.redis` 配置。从 `hm-dianping` 启动时，Spring Boot 会读取这个优先级更高的外部文件。Git 会忽略它。Lettuce 和 Redisson 共用 `spring.redis` 下的单机连接配置。
 
-图片上传使用 `utils/SystemConstants.java` 中的 `IMAGE_UPLOAD_DIR`。验证上传和删除功能前，将它指向本机 `hmdp-nginx/html/hmdp/imgs` 的绝对路径，并确保目录可写。
+从 `hm-dianping` 启动时，图片默认保存到相邻的 Nginx 静态资源目录。若调整工作目录或部署位置，可将 `HMDP_UPLOAD_DIR` 设为对应静态目录的绝对路径。
 
 ## 启动与运行
 
@@ -120,12 +121,7 @@ java -jar target/hm-dianping-0.0.1-SNAPSHOT.jar
 
 5. **验证后端**。访问 `http://localhost:8081/shop-type/list`、`http://localhost:8081/shop/1`，应返回 `Result` JSON。
 
-6. **启动前端**。在 Windows PowerShell 中进入相邻的 `hmdp-nginx` 目录并执行以下命令。打开 `http://localhost:8080/`，在同一目录执行 `.\nginx.exe -s stop` 可停止服务。现有批处理文件使用旧的 `E:\hmdp-nginx` 路径。
-
-```powershell
-New-Item -ItemType Directory -Force -Path logs,temp | Out-Null
-Start-Process -FilePath .\nginx.exe -WorkingDirectory (Get-Location).Path -WindowStyle Hidden
-```
+6. **启动前端**。在 Windows PowerShell 中进入相邻的 `hmdp-nginx` 目录，执行 `.\start-nginx.bat` 后打开 `http://127.0.0.1:8080/`。停止时执行 `.\stop-nginx.bat`。脚本以自身所在目录为 Nginx 前缀。
 
 后端启动时，`RedisDataInitializer` 根据 MySQL 补齐缺失的 `seckill:stock:*` 和 `shop:geo:*`。补齐范围是秒杀库存和店铺坐标。
 
@@ -228,7 +224,6 @@ Start-Process -FilePath .\nginx.exe -WorkingDirectory (Get-Location).Path -Windo
 
 ## 已知限制
 
-- `SystemConstants.IMAGE_UPLOAD_DIR` 使用固定的 Windows 路径，需按本机静态目录配置。
 - `POST /user/logout` 未实现（直接返回「功能未完成」），token 只能等 TTL 自然过期。
 - 秒杀相关的 `seckill:stock:*`、`seckill:order:*`、`stream.orders` 均未设 TTL，需人工清理。
 - 异步消费方法 `createVoucherOrder` 未加 `@Transactional`，扣库存与写订单在同一方法内顺序执行，但不在同一本地事务中（与课程版本一致）。

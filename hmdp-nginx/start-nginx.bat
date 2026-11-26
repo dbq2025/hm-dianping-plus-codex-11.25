@@ -1,12 +1,19 @@
 @echo off
-rem Start nginx for hm-dianping frontend (must run from ASCII path, Chinese path is NOT supported by nginx for Windows)
-cd /d E:\hmdp-nginx
-tasklist /FI "IMAGENAME eq nginx.exe" | find /I "nginx.exe" >nul
-if %errorlevel%==0 (
-    echo nginx is already running. http://localhost:8080/index.html
-    pause
-    exit /b 0
+setlocal
+pushd "%~dp0" || exit /b 1
+if not exist logs mkdir logs
+if not exist temp mkdir temp
+for %%F in (logs\nginx.pid) do if exist "%%F" if %%~zF GTR 0 (
+    echo A project nginx PID file exists. Check the process before starting again.
+    popd
+    exit /b 1
 )
-nginx.exe -p E:\hmdp-nginx\
-echo nginx started. Open http://localhost:8080/index.html
-pause
+nginx.exe -t
+if errorlevel 1 (
+    popd
+    exit /b 1
+)
+start "" /b "%CD%\nginx.exe"
+set "rc=%errorlevel%"
+popd
+exit /b %rc%

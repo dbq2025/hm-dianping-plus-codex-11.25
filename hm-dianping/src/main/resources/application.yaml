@@ -1,5 +1,7 @@
 server:
   port: 8081
+hmdp:
+  upload-dir: "${HMDP_UPLOAD_DIR:../hmdp-nginx/html/hmdp/imgs}"
 spring:
   application:
     name: hmdp
